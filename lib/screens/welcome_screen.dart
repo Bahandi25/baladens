@@ -39,7 +39,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             children: [
               Lottie.asset(
                 'assets/animations/loading.json',
-                height: 250,
+                height: 350,
               ),
               const SizedBox(height: 20),
               const Text(

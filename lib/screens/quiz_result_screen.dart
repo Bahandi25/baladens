@@ -24,8 +24,8 @@ class QuizResultScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             isCorrect
-                ? Lottie.asset("assets/animations/correct_answer.json", height: 150)
-                : Lottie.asset("assets/animations/wrong_answer.json", height: 150),
+                ? Lottie.asset("assets/animations/correct_answer.json", height: 250)
+                : Lottie.asset("assets/animations/wrong_answer.json", height: 250),
             const SizedBox(height: 20),
             Text(isCorrect ? "Well done!" : "Try again next time!",
                 style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),

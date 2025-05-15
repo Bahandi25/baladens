@@ -53,7 +53,7 @@ class _LogoScreenState extends State<LogoScreen>
             opacity: _animation,
             child: Image.asset(
               'assets/animations/logo.gif',
-              height: 200,
+              height: 280,
             ),
           ),
         ),

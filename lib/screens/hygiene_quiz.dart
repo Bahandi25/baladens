@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'quiz_result_screen.dart';
+import 'hygiene_result.dart';
 import '../services/sound_service.dart';
 
-class QuizScreen extends StatefulWidget {
-  const QuizScreen({super.key});
+class HygieneQuizScreen extends StatefulWidget {
+  const HygieneQuizScreen({super.key});
 
   @override
-  State<QuizScreen> createState() => _QuizScreenState();
+  State<HygieneQuizScreen> createState() => _HygieneQuizScreenState();
 }
 
-class _QuizScreenState extends State<QuizScreen> {
+class _HygieneQuizScreenState extends State<HygieneQuizScreen> {
   final SoundService _soundService = SoundService();
   String? selectedAnswer;
   bool isCorrect = false;
@@ -18,7 +18,7 @@ class _QuizScreenState extends State<QuizScreen> {
   void checkAnswer(String answer) {
     setState(() {
       selectedAnswer = answer;
-      isCorrect = (answer == "Salad");
+      isCorrect = (answer == "Wash your hands");
     });
 
     _soundService.playSound(isCorrect ? "correct.mp3" : "wrong.mp3");
@@ -27,7 +27,7 @@ class _QuizScreenState extends State<QuizScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => QuizResultScreen(isCorrect: isCorrect),
+          builder: (context) => HygieneResultScreen(isCorrect: isCorrect),
         ),
       );
     });
@@ -36,7 +36,7 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green.shade50,
+      backgroundColor: Colors.lightBlue.shade50,
       body: Center(
         child: SingleChildScrollView(
           child: Container(
@@ -59,7 +59,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 Lottie.asset('assets/animations/thinking.json', height: 140),
                 const SizedBox(height: 20),
                 const Text(
-                  "What should I eat?",
+                  "What should you do before eating?",
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -69,16 +69,17 @@ class _QuizScreenState extends State<QuizScreen> {
                 ),
                 const SizedBox(height: 24),
 
+                // Grid ответов
                 GridView.count(
                   crossAxisCount: 2,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   childAspectRatio: 1,
                   children: [
-                    _buildAnswerOption("Hamburger", "🍔"),
-                    _buildAnswerOption("Salad", "🥗"),
-                    _buildAnswerOption("Pizza", "🍕"),
-                    _buildAnswerOption("Burrito", "🌯"),
+                    _buildAnswerOption("Wash your hands", "🧼"),
+                    _buildAnswerOption("Play outside", "⚽"),
+                    _buildAnswerOption("Watch TV", "📺"),
+                    _buildAnswerOption("Eat immediately", "🍔"),
                   ],
                 ),
               ],

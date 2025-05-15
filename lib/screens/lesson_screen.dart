@@ -10,28 +10,68 @@ class LessonScreen extends StatelessWidget {
     final soundService = SoundService();
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text("What should you eat to stay healthy?",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 20),
-            const Text(
-              "Healthy food includes fruits, vegetables, and balanced meals. Avoid junk food and processed sugars.",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 40),
-            ElevatedButton(
+      backgroundColor: const Color(0xFFF0F8FF),
+      body: Center(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          margin: const EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/images/healthy_food.jpg',
+                height: 160,
+              ),
+              const SizedBox(height: 20),
+
+              const Text(
+                "What should you eat to stay healthy?",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF333366),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Healthy food includes fruits, vegetables,\nand balanced meals. Avoid junk food\nand processed sugars.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton(
                 onPressed: () {
                   soundService.playSound("button_click.mp3");
                   Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => const QuizScreen()));
+                    context,
+                    MaterialPageRoute(builder: (context) => const QuizScreen()),
+                  );
                 },
-                child: const Text("I Understand!"))
-          ],
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4CAF50),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                child: const Text("I Understand!"),
+              ),
+            ],
+          ),
         ),
       ),
     );
