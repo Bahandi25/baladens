@@ -31,38 +31,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
     User? user = FirebaseAuth.instance.currentUser;
     String? userId = user?.uid;
 
-    if (user != null && mounted) {
+  if (user != null) {
+    if (!mounted) return;  // Check mounted before setState
+    setState(() {
+      username = user.displayName ?? "User";
+    });
+  }
+
+  if (userId != null) {
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+
+    if (userDoc.exists) {
+      final progress = userDoc['progress'] ?? {};
+      if (!mounted) return;  // Check mounted before setState
       setState(() {
-        username = user.displayName ?? "User";
+        foodProgress = (progress['healthy_food'] ?? 0) as int;
+        hygieneProgress = (progress['hygiene'] ?? 0) as int;
+        gymProgress = (progress['gym'] ?? 0) as int;
+        avatar = "assets/avatars/${userDoc['avatar']}";
       });
     }
-
-    if (userId != null) {
-      try {
-        final userDoc =
-            await FirebaseFirestore.instance
-                .collection('users')
-                .doc(userId)
-                .get();
-
-        if (!mounted) return;
-
-        if (userDoc.exists) {
-          final progress = userDoc['progress'] ?? {};
-          if (mounted) {
-            setState(() {
-              foodProgress = (progress['healthy_food'] ?? 0) as int;
-              hygieneProgress = (progress['hygiene'] ?? 0) as int;
-              gymProgress = (progress['gym'] ?? 0) as int;
-              avatar = "assets/avatars/${userDoc['avatar']}";
-            });
-          }
-        }
-      } catch (e) {
-        // добавить обработку ошибок
-      }
-    }
   }
+}
 
   void _logout(BuildContext context) async {
     final soundService = SoundService();
@@ -237,14 +227,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildLessonProgress(
-    String title, String imagePath, int progress, {bool compact = false}) {
-  double progressFraction = progress / 100;
-  String attemptText = progress == 100
-      ? "1/1"
-      : progress == 50
-          ? "0.5/1"
-          : "0/1";
+  Widget _buildLessonProgress(String title, String imagePath, int progress) {
+    double progressFraction = progress / 100;
+    String attemptText = progress == 100
+        ? "1/1"
+        : progress == 50
+            ? "0.5/1"
+            : "0/1";
 
   final double height = compact ? 80 : 100;
   final double imageSize = compact ? 36 : 50;
@@ -277,24 +266,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: fontSize,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      "$progress% • $attemptText",
-                      style: TextStyle(
-                        fontSize: fontSize - 2,
-                        color: progress == 100
-                            ? Colors.green
-                            : Colors.orange,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    Text(title,
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text("$progress% • $attemptText",
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: progress == 100
+                                ? Colors.green
+                                : Colors.orange)),
                   ],
                 ),
               ),

@@ -14,17 +14,17 @@ class HomeScreen extends StatelessWidget {
     soundService.playSound("button_click.mp3");
 
     if (module == "Healthy Food") {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const LessonScreen()),
       );
     } else if (module == "Hygiene") {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HygieneScreen()),
       );
     } else if (module == "Gym") {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const GymScreen()),
       );
@@ -60,9 +60,9 @@ class HomeScreen extends StatelessWidget {
       },
     ];
 
-    return Scaffold(
-      backgroundColor: Colors.blue.shade50,
-      body: SafeArea(
+    return Container(
+      color: Colors.blue.shade50,
+      child: SafeArea(
         child: Column(
           children: [
             Padding(
@@ -229,7 +229,7 @@ class _HexagonCardState extends State<_HexagonCard>
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: widget.color.withOpacity(0.15), 
+                      color: widget.color.withOpacity(0.15),
                       blurRadius: 12,
                       spreadRadius: 3,
                       offset: const Offset(0, 3),
