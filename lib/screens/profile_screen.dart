@@ -28,31 +28,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUserProfile() async {
-  User? user = FirebaseAuth.instance.currentUser;
-  String? userId = user?.uid;
+    User? user = FirebaseAuth.instance.currentUser;
+    String? userId = user?.uid;
 
-  if (user != null) {
-    if (!mounted) return;  // Check mounted before setState
-    setState(() {
-      username = user.displayName ?? "User";
-    });
-  }
-
-  if (userId != null) {
-    DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-
-    if (userDoc.exists) {
-      final progress = userDoc['progress'] ?? {};
-      if (!mounted) return;  // Check mounted before setState
+    if (user != null && mounted) {
       setState(() {
-        foodProgress = (progress['healthy_food'] ?? 0) as int;
-        hygieneProgress = (progress['hygiene'] ?? 0) as int;
-        gymProgress = (progress['gym'] ?? 0) as int;
-        avatar = "assets/avatars/${userDoc['avatar']}";
+        username = user.displayName ?? "User";
       });
     }
+
+    if (userId != null) {
+      try {
+        final userDoc =
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(userId)
+                .get();
+
+        if (!mounted) return;
+
+        if (userDoc.exists) {
+          final progress = userDoc['progress'] ?? {};
+          if (mounted) {
+            setState(() {
+              foodProgress = (progress['healthy_food'] ?? 0) as int;
+              hygieneProgress = (progress['hygiene'] ?? 0) as int;
+              gymProgress = (progress['gym'] ?? 0) as int;
+              avatar = "assets/avatars/${userDoc['avatar']}";
+            });
+          }
+        }
+      } catch (e) {
+        // добавить обработку ошибок
+      }
+    }
   }
-}
 
   void _logout(BuildContext context) async {
     final soundService = SoundService();
@@ -85,9 +95,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 24),
 
-
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 24,
+                  horizontal: 16,
+                ),
                 margin: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -131,7 +143,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 14),
+                              horizontal: 20,
+                              vertical: 14,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -144,7 +158,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 14),
+                              horizontal: 20,
+                              vertical: 14,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -158,7 +174,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.redAccent,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 14),
+                              horizontal: 20,
+                              vertical: 14,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -172,7 +190,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               const SizedBox(height: 36),
 
-        
               Text(
                 "Lessons",
                 textAlign: TextAlign.center,
@@ -185,23 +202,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               const SizedBox(height: 20),
 
-             
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: _buildLessonProgress(
-                        "Healthy Food", "assets/covers/food.png", foodProgress),
+                      "Healthy Food",
+                      "assets/covers/food.png",
+                      foodProgress,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _buildLessonProgress(
-                        "Hygiene", "assets/covers/hygiene.png", hygieneProgress),
+                      "Hygiene",
+                      "assets/covers/hygiene.png",
+                      hygieneProgress,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _buildLessonProgress(
-                        "Gym", "assets/covers/gym.png", gymProgress),
+                      "Gym",
+                      "assets/covers/gym.png",
+                      gymProgress,
+                    ),
                   ),
                 ],
               ),
@@ -212,82 +237,104 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildLessonProgress(String title, String imagePath, int progress) {
-    double progressFraction = progress / 100;
-    String attemptText = progress == 100
-        ? "1/1"
-        : progress == 50
-            ? "0.5/1"
-            : "0/1";
+  Widget _buildLessonProgress(
+    String title, String imagePath, int progress, {bool compact = false}) {
+  double progressFraction = progress / 100;
+  String attemptText = progress == 100
+      ? "1/1"
+      : progress == 50
+          ? "0.5/1"
+          : "0/1";
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 12),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          CustomPaint(
-            size: const Size(200, 100),
-            painter: OvalProgressPainter(progressFraction),
+  final double height = compact ? 80 : 100;
+  final double imageSize = compact ? 36 : 50;
+  final double fontSize = compact ? 13 : 16;
+
+  return Container(
+    margin: const EdgeInsets.symmetric(vertical: 12),
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        CustomPaint(
+          size: Size(200, height),
+          painter: OvalProgressPainter(progressFraction),
+        ),
+        Container(
+          width: 200,
+          height: height,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.grey.shade300, width: 2),
+            borderRadius: BorderRadius.circular(50),
           ),
-          Container(
-            width: 200,
-            height: 100,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: Colors.grey.shade300, width: 2),
-              borderRadius: BorderRadius.circular(50),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(imagePath, height: 50),
-                const SizedBox(width: 12),
-                Column(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(imagePath, height: imageSize),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
-                    Text("$progress% • $attemptText",
-                        style: TextStyle(
-                            fontSize: 14,
-                            color: progress == 100
-                                ? Colors.green
-                                : Colors.orange)),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      "$progress% • $attemptText",
+                      style: TextStyle(
+                        fontSize: fontSize - 2,
+                        color: progress == 100
+                            ? Colors.green
+                            : Colors.orange,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 }
 
 class OvalProgressPainter extends CustomPainter {
-  final double progress; 
+  final double progress;
 
   OvalProgressPainter(this.progress);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint basePaint = Paint()
-      ..color = Colors.grey.shade300
-      ..strokeWidth = 8
-      ..style = PaintingStyle.stroke;
+    final Paint basePaint =
+        Paint()
+          ..color = Colors.grey.shade300
+          ..strokeWidth = 8
+          ..style = PaintingStyle.stroke;
 
-    final Paint progressPaint = Paint()
-      ..color = progress == 1
-          ? Colors.green
-          : (progress == 0.5 ? Colors.orange : Colors.red)
-      ..strokeWidth = 8
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+    final Paint progressPaint =
+        Paint()
+          ..color =
+              progress == 1
+                  ? Colors.green
+                  : (progress == 0.5 ? Colors.orange : Colors.red)
+          ..strokeWidth = 8
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
 
     final Rect rect = Rect.fromLTWH(0, 0, size.width, size.height);
-    final RRect rRect = RRect.fromRectAndRadius(rect, const Radius.circular(50));
+    final RRect rRect = RRect.fromRectAndRadius(
+      rect,
+      const Radius.circular(50),
+    );
     final Path ovalPath = Path()..addRRect(rRect);
 
     canvas.drawPath(ovalPath, basePaint);
