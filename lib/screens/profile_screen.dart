@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/firestore_service.dart';
 import '../services/sound_service.dart';
+import '../services/auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -13,18 +14,28 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final FirestoreService _firestoreService = FirestoreService();
+  final AuthService _authService = AuthService();
   String avatar = "assets/avatars/avatar1.png";
+  bool _useDefaultAvatar = false;
 
   int foodProgress = 0;
   int hygieneProgress = 0;
   int gymProgress = 0;
 
   String username = "User";
+  String nickname = "User";
+
+  Map<String, dynamic> _levelInfo = {
+    'level': 1,
+    'points': 0,
+    'pointsToNextLevel': 100,
+  };
 
   @override
   void initState() {
     super.initState();
     _loadUserProfile();
+    _loadLevelInfo();
   }
 
   Future<void> _loadUserProfile() async {
@@ -53,9 +64,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           hygieneProgress = (progress['hygiene'] ?? 0) as int;
           gymProgress = (progress['gym'] ?? 0) as int;
           avatar = "assets/avatars/${userDoc['avatar']}";
+          nickname = userDoc['name'] ?? "User";
         });
       }
     }
+  }
+
+  Future<void> _loadLevelInfo() async {
+    final levelInfo = await _firestoreService.getUserLevelInfo();
+    setState(() {
+      _levelInfo = levelInfo;
+    });
   }
 
   void _logout(BuildContext context) async {
@@ -69,6 +88,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
@@ -115,7 +135,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     CircleAvatar(
                       radius: 52,
-                      backgroundImage: AssetImage(avatar),
+                      backgroundImage:
+                          (!_useDefaultAvatar && user?.photoURL != null)
+                              ? NetworkImage(user!.photoURL!)
+                              : AssetImage(avatar) as ImageProvider,
+                      onBackgroundImageError: (exception, stackTrace) {
+                        print('Error loading profile image: $exception');
+                        setState(() {
+                          _useDefaultAvatar = true;
+                        });
+                      },
+                      child:
+                          (_useDefaultAvatar || user?.photoURL == null)
+                              ? const Icon(Icons.person, size: 50)
+                              : null,
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -126,59 +159,77 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: Colors.deepPurple.shade900,
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "@$nickname",
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                     const SizedBox(height: 20),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton.icon(
-                          icon: const Icon(Icons.person),
-                          label: const Text("Username"),
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 14,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.edit),
+                      label: const Text("Edit Profile"),
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/settings');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 14,
                         ),
-                        const SizedBox(width: 16),
-                        ElevatedButton.icon(
-                          icon: const Icon(Icons.image),
-                          label: const Text("Avatar"),
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 14,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        const SizedBox(width: 16),
-                        ElevatedButton.icon(
-                          icon: const Icon(Icons.logout),
-                          label: const Text("Logout"),
-                          onPressed: () => _logout(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.redAccent,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 14,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ],
+                ),
+              ),
+
+              const SizedBox(height: 36),
+
+              Text(
+                "Level",
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.3,
+                  color: Colors.deepPurple.shade700,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Level ${_levelInfo['level']}',
+                        style: theme.textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      LinearProgressIndicator(
+                        value:
+                            (1 - (_levelInfo['pointsToNextLevel'] / 100))
+                                .toDouble(),
+                        backgroundColor: Colors.grey[200],
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${_levelInfo['points']} points • ${_levelInfo['pointsToNextLevel']} to next level',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
                 ),
               ),
 

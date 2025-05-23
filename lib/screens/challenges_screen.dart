@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/firestore_service.dart';
 import '../services/sound_service.dart';
+import 'badges_screen.dart';
 
 class ChallengesScreen extends StatefulWidget {
   const ChallengesScreen({super.key});
@@ -14,6 +15,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
   final SoundService _soundService = SoundService();
   List<Map<String, dynamic>> _challenges = [];
   bool _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -22,12 +24,30 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
   }
 
   Future<void> _loadChallenges() async {
-    setState(() => _isLoading = true);
-    final challenges = await _firestoreService.getUserChallenges();
-    setState(() {
-      _challenges = challenges;
-      _isLoading = false;
-    });
+    try {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+
+      final challenges = await _firestoreService.getUserChallenges();
+      print('Loaded challenges: ${challenges.length}'); // Debug print
+
+      if (!mounted) return;
+
+      setState(() {
+        _challenges = challenges;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading challenges: $e'); // Debug print
+      if (!mounted) return;
+
+      setState(() {
+        _error = 'Failed to load challenges. Please try again.';
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -37,6 +57,32 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
       body:
           _isLoading
               ? const Center(child: CircularProgressIndicator())
+              : _error != null
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      _error!,
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: _loadChallenges,
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              )
+              : _challenges.isEmpty
+              ? const Center(
+                child: Text(
+                  'No challenges available yet.\nComplete some lessons to unlock challenges!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16),
+                ),
+              )
               : RefreshIndicator(
                 onRefresh: _loadChallenges,
                 child: CustomScrollView(
@@ -58,6 +104,36 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                           onPressed: _loadChallenges,
                         ),
                       ],
+                    ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const BadgesScreen(),
+                              ),
+                            );
+                          },
+                          icon: Image.asset(
+                            'assets/badgelogo.png',
+                            width: 24,
+                            height: 24,
+                          ),
+                          label: const Text('View Badges'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                     SliverPadding(
                       padding: const EdgeInsets.all(16),
