@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import '../services/sound_service.dart';
@@ -5,13 +6,61 @@ import 'lesson_screen.dart';
 import 'hygiene_screen.dart';
 import 'gym_screen.dart';
 import 'dart:math';
+import 'package:another_flushbar/flushbar.dart';
 
-class HomeScreen extends StatelessWidget {
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  Timer? _inactivityTimer;
+  int _reminderCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _startInactivityTimer();
+  }
+  
+  void _showInactivityBanner() {
+  if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
+
+  Flushbar(
+    title: "Don't Forget! 🧠",
+    message: "It's time to learn something new. Tap a module to begin!",
+    icon: const Icon(Icons.access_time, color: Colors.white),
+    duration: const Duration(seconds: 4),
+    flushbarPosition: FlushbarPosition.TOP,
+    backgroundColor: Colors.indigo.shade400,
+    margin: const EdgeInsets.all(8),
+    borderRadius: BorderRadius.circular(12),
+    animationDuration: const Duration(milliseconds: 500),
+    forwardAnimationCurve: Curves.easeOutBack,
+  ).show(context);
+}
+
+
+  @override
+  void dispose() {
+    _inactivityTimer?.cancel();
+    super.dispose();
+  }
+  void _startInactivityTimer() {
+    _inactivityTimer?.cancel(); // очистим старый таймер
+    _inactivityTimer = Timer.periodic(const Duration(seconds: 20), (timer) {
+      _showInactivityBanner();
+    });
+  }
 
   void _handleModuleTap(BuildContext context, String module) {
     final soundService = SoundService();
     soundService.playSound("button_click.mp3");
+
+    _inactivityTimer?.cancel();// остановить таймер
 
     if (module == "Healthy Food") {
       Navigator.pushReplacement(
@@ -34,6 +83,8 @@ class HomeScreen extends StatelessWidget {
       ).showSnackBar(const SnackBar(content: Text("Will be available soon")));
     }
   }
+
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -113,20 +164,18 @@ class HomeScreen extends StatelessWidget {
                       spacing: 20,
                       runSpacing: 20,
                       alignment: WrapAlignment.center,
-                      children:
-                          modules.map((m) {
-                            return _HexagonCard(
-                              title: m['title'] as String,
-                              animation: m['animation'] as String,
-                              color: m['color'] as Color,
-                              onTap:
-                                  () => _handleModuleTap(
-                                    context,
-                                    m['title'] as String,
-                                  ),
-                              size: cardSize,
-                            );
-                          }).toList(),
+                      children: modules.map((m) {
+                        return _HexagonCard(
+                          title: m['title'] as String,
+                          animation: m['animation'] as String,
+                          color: m['color'] as Color,
+                          onTap: () => _handleModuleTap(
+                            context,
+                            m['title'] as String,
+                          ),
+                          size: cardSize,
+                        );
+                      }).toList(),
                     ),
                   );
                 },
@@ -138,6 +187,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
+
 
 class _HexagonCard extends StatefulWidget {
   final String title;

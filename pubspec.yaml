@@ -43,6 +43,9 @@ dependencies:
   flutter_animate: ^4.5.2
   just_audio: ^0.9.46
   shared_preferences: ^2.5.2
+  firebase_messaging: 15.2.3
+  flutter_local_notifications: ^17.1.2
+  another_flushbar: ^1.10.30
 
 dev_dependencies:
   flutter_test:
