@@ -25,8 +25,14 @@ class HygieneResultScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             isCorrect
-                ? Lottie.asset("assets/animations/correct_answer.json", height: 150)
-                : Lottie.asset("assets/animations/wrong_answer.json", height: 150),
+                ? Lottie.asset(
+                  "assets/animations/correct_answer.json",
+                  height: 150,
+                )
+                : Lottie.asset(
+                  "assets/animations/wrong_answer.json",
+                  height: 150,
+                ),
             const SizedBox(height: 20),
             Text(
               isCorrect ? "Great job!" : "Keep practicing!",
@@ -38,11 +44,12 @@ class HygieneResultScreen extends StatelessWidget {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const DashboardScreen()),
+                    builder: (context) => const DashboardScreen(),
+                  ),
                 );
               },
               child: const Text("Back to Dashboard"),
-            )
+            ),
           ],
         ),
       ),

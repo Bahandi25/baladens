@@ -9,6 +9,7 @@ import 'gym_screen.dart';
 import 'ai_assistant_screen.dart';
 import 'dart:math';
 import 'package:another_flushbar/flushbar.dart';
+import 'level_selection_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -63,20 +64,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _inactivityTimer?.cancel(); // остановить таймер
 
-    if (module == "Healthy Food") {
-      Navigator.pushReplacement(
+    int totalLevels;
+    switch (module) {
+      case "Gym":
+        totalLevels = 12;
+        break;
+      case "Hygiene":
+        totalLevels = 9;
+        break;
+      case "Healthy Food":
+        totalLevels = 7;
+        break;
+      default:
+        totalLevels = 0;
+    }
+
+    if (module != "More Soon") {
+      Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const LessonScreen()),
-      );
-    } else if (module == "Hygiene") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HygieneScreen()),
-      );
-    } else if (module == "Gym") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const GymScreen()),
+        MaterialPageRoute(
+          builder:
+              (context) => LevelSelectionScreen(
+                module: module,
+                totalLevels: totalLevels,
+              ),
+        ),
       );
     } else {
       ScaffoldMessenger.of(

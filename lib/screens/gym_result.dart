@@ -20,7 +20,7 @@ class _GymResultScreenState extends State<GymResultScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     int score = widget.isCorrect ? 100 : 50;
     _firestoreService.saveLessonProgress("gym", score);
     _soundService.playSound("lesson_complete.mp3");
@@ -56,9 +56,13 @@ class _GymResultScreenState extends State<GymResultScreen> {
                 children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: widget.isCorrect ? Colors.green : Colors.red,
+                      backgroundColor:
+                          widget.isCorrect ? Colors.green : Colors.red,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 14,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -67,17 +71,23 @@ class _GymResultScreenState extends State<GymResultScreen> {
                       if (widget.isCorrect) {
                         Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => const DashboardScreen()),
+                          MaterialPageRoute(
+                            builder: (context) => const DashboardScreen(),
+                          ),
                           (route) => false,
                         );
                       } else {
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => const GymScreen()),
+                          MaterialPageRoute(
+                            builder: (context) => const GymScreen(),
+                          ),
                         );
                       }
                     },
-                    child: Text(widget.isCorrect ? "Back to Dashboard" : "Try Again"),
+                    child: Text(
+                      widget.isCorrect ? "Back to Dashboard" : "Try Again",
+                    ),
                   ),
                   if (!widget.isCorrect) ...[
                     const SizedBox(width: 20),
@@ -85,7 +95,10 @@ class _GymResultScreenState extends State<GymResultScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[600],
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 14,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -93,7 +106,9 @@ class _GymResultScreenState extends State<GymResultScreen> {
                       onPressed: () {
                         Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => const DashboardScreen()),
+                          MaterialPageRoute(
+                            builder: (context) => const DashboardScreen(),
+                          ),
                           (route) => false,
                         );
                       },

@@ -125,13 +125,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       try {
         User? user = FirebaseAuth.instance.currentUser;
         if (user != null) {
-          // Delete user data from Firestore
           await FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)
               .delete();
 
-          // Delete user authentication
           await user.delete();
 
           if (mounted) {
@@ -225,7 +223,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     crossAxisSpacing: 8,
                                     mainAxisSpacing: 8,
                                   ),
-                              itemCount: 8, // Assuming we have 8 avatars
+                              itemCount: 8, 
                               itemBuilder: (context, index) {
                                 final avatar = "avatar${index + 1}.png";
                                 return GestureDetector(

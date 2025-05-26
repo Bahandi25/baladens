@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<void> saveLessonProgress(String moduleId, int score) async {
     String? userId = FirebaseAuth.instance.currentUser?.uid;
@@ -13,7 +14,6 @@ class FirestoreService {
 
     DocumentReference userDoc = _firestore.collection('users').doc(userId);
 
-    // First, get current progress to check for daily/weekly completion
     DocumentSnapshot doc = await userDoc.get();
     Map<String, dynamic> currentData =
         doc.data() as Map<String, dynamic>? ?? {};
@@ -25,23 +25,20 @@ class FirestoreService {
     print('Current progress before update: $currentProgress');
     print('Current points before update: $currentPoints');
 
-    // Check if this is a new completion (score is 100 and wasn't completed before)
     bool isNewCompletion =
         score == 100 && (currentProgress[moduleId] ?? 0) < 100;
 
-    // Award 50 points for completing a module
     if (isNewCompletion) {
       currentPoints += 50;
       print('Awarded 50 points for completing module $moduleId');
+      await addCoins(2); 
     }
 
-    // Update progress and points
     await userDoc.set({
       'progress': {moduleId: score},
       'points': currentPoints,
     }, SetOptions(merge: true));
 
-    // Check and update daily challenge
     String dailyChallengeId = 'daily_1';
     if (!currentData.containsKey('challenges') ||
         !currentData['challenges'].containsKey(dailyChallengeId) ||
@@ -51,7 +48,6 @@ class FirestoreService {
       await updateChallengeStatus(dailyChallengeId, true);
     }
 
-    // Check and update weekly challenge
     String weeklyChallengeId = 'weekly_1';
     bool allLessonsCompleted = true;
     print('\nChecking weekly challenge completion:');
@@ -66,7 +62,6 @@ class FirestoreService {
     print('All lessons completed: $allLessonsCompleted');
     print('Current challenges: ${currentData['challenges']}');
 
-    // If all lessons are completed for the first time, award 100 points
     bool isWeeklyNewCompletion =
         allLessonsCompleted &&
         (!currentData.containsKey('challenges') ||
@@ -82,7 +77,6 @@ class FirestoreService {
       await updateChallengeStatus(weeklyChallengeId, true);
     }
 
-    // Get final points after all updates
     doc = await userDoc.get();
     int finalPoints = (doc.data() as Map<String, dynamic>?)?['points'] ?? 0;
     print('Final points after all updates: $finalPoints');
@@ -104,7 +98,6 @@ class FirestoreService {
     return 0;
   }
 
-  // New methods for challenges
   Future<List<Map<String, dynamic>>> getUserChallenges() async {
     String? userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) {
@@ -122,7 +115,6 @@ class FirestoreService {
       return [];
     }
 
-    // Get user's progress and completed challenges
     Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
     Map<String, dynamic> progress = userData['progress'] ?? {};
     Map<String, dynamic> completedChallenges = userData['challenges'] ?? {};
@@ -130,11 +122,9 @@ class FirestoreService {
     print('User progress: $progress');
     print('Completed challenges: $completedChallenges');
 
-    // Generate challenges based on progress
     List<Map<String, dynamic>> challenges = [];
 
-    // Food challenges
-    if (progress['healthy_food'] != null) {
+    if (progress['healthy_food'] == 100) {
       String challengeId = 'food_1';
       challenges.add({
         'id': challengeId,
@@ -149,8 +139,7 @@ class FirestoreService {
       });
     }
 
-    // Hygiene challenges
-    if (progress['hygiene'] != null) {
+    if (progress['hygiene'] == 100) {
       String challengeId = 'hygiene_1';
       challenges.add({
         'id': challengeId,
@@ -165,8 +154,7 @@ class FirestoreService {
       });
     }
 
-    // Gym challenges
-    if (progress['gym'] != null) {
+    if (progress['gym'] == 100) {
       String challengeId = 'gym_1';
       challenges.add({
         'id': challengeId,
@@ -177,11 +165,10 @@ class FirestoreService {
         'completed':
             progress['gym'] == 100 ||
             completedChallenges.containsKey(challengeId),
-        'icon': '💪',
+        'icon': '��',
       });
     }
 
-    // Daily challenge
     String dailyChallengeId = 'daily_1';
     bool isDailyCompleted =
         completedChallenges.containsKey(dailyChallengeId) &&
@@ -196,7 +183,6 @@ class FirestoreService {
       'icon': '📚',
     });
 
-    // Weekly challenge
     String weeklyChallengeId = 'weekly_1';
     bool allLessonsCompleted = [
       'healthy_food',
@@ -242,7 +228,6 @@ class FirestoreService {
     DateTime now = DateTime.now();
     DateTime completedDate = completedAt.toDate();
 
-    // Get the start of the current week (Monday)
     DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
     startOfWeek = DateTime(
       startOfWeek.year,
@@ -250,7 +235,6 @@ class FirestoreService {
       startOfWeek.day,
     );
 
-    // Get the start of the week when the challenge was completed
     DateTime completedWeekStart = completedDate.subtract(
       Duration(days: completedDate.weekday - 1),
     );
@@ -272,18 +256,16 @@ class FirestoreService {
 
     print('Updating challenge status: $challengeId to $completed');
 
-    // Get the challenge reward
     int reward = 0;
     if (challengeId == 'daily_1')
       reward = 25;
     else if (challengeId == 'weekly_1')
       reward = 100;
     else
-      reward = 50; // achievement challenges
+      reward = 50; 
 
     print('Challenge reward: $reward points');
 
-    // Get current points and challenges before update
     DocumentSnapshot doc =
         await _firestore.collection('users').doc(userId).get();
     Map<String, dynamic> userData = doc.data() as Map<String, dynamic>? ?? {};
@@ -293,7 +275,6 @@ class FirestoreService {
     print('Current points before challenge update: $currentPoints');
     print('Current challenges: $currentChallenges');
 
-    // Only award points if this is a new completion
     bool isNewCompletion =
         !currentChallenges.containsKey(challengeId) ||
         !currentChallenges[challengeId]['completed'];
@@ -303,7 +284,6 @@ class FirestoreService {
       print('Awarding $reward points for new challenge completion');
     }
 
-    // Update challenge status and points
     await _firestore.collection('users').doc(userId).set({
       'challenges': {
         challengeId: {
@@ -314,7 +294,6 @@ class FirestoreService {
       'points': currentPoints,
     }, SetOptions(merge: true));
 
-    // Get final points after update
     doc = await _firestore.collection('users').doc(userId).get();
     int finalPoints = (doc.data() as Map<String, dynamic>?)?['points'] ?? 0;
     print('Final points after challenge update: $finalPoints');
@@ -332,9 +311,7 @@ class FirestoreService {
     Map<String, dynamic> userData = doc.data() as Map<String, dynamic>;
     int points = userData['points'] ?? 0;
 
-    // Calculate level (each level requires 100 points)
     int level = (points ~/ 100) + 1;
-    // Calculate points needed for next level (remaining points to next 100)
     int pointsToNextLevel = 100 - (points % 100);
 
     print('=== Level Calculation Debug ===');
@@ -348,5 +325,88 @@ class FirestoreService {
       'points': points,
       'pointsToNextLevel': pointsToNextLevel,
     };
+  }
+
+  Future<int> getUserCoins() async {
+    try {
+      String? userId = _auth.currentUser?.uid;
+      if (userId == null) return 0;
+
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(userId).get();
+      return (userDoc.data() as Map<String, dynamic>?)?['coins'] ?? 0;
+    } catch (e) {
+      print('Error getting user coins: $e');
+      return 0;
+    }
+  }
+
+  Future<void> addCoins(int amount) async {
+    try {
+      String? userId = _auth.currentUser?.uid;
+      if (userId == null) return;
+
+      DocumentReference userRef = _firestore.collection('users').doc(userId);
+
+      await _firestore.runTransaction((transaction) async {
+        DocumentSnapshot userDoc = await transaction.get(userRef);
+        int currentCoins =
+            (userDoc.data() as Map<String, dynamic>?)?['coins'] ?? 0;
+        transaction.update(userRef, {'coins': currentCoins + amount});
+      });
+    } catch (e) {
+      print('Error adding coins: $e');
+    }
+  }
+
+  Future<bool> isModuleUnlocked(String moduleId) async {
+    try {
+      String? userId = _auth.currentUser?.uid;
+      if (userId == null) return false;
+
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(userId).get();
+      List<String> unlockedModules = List<String>.from(
+        (userDoc.data() as Map<String, dynamic>?)?['unlocked_modules'] ?? [],
+      );
+      return unlockedModules.contains(moduleId);
+    } catch (e) {
+      print('Error checking module unlock status: $e');
+      return false;
+    }
+  }
+
+  Future<bool> unlockModule(String moduleId) async {
+    try {
+      String? userId = _auth.currentUser?.uid;
+      if (userId == null) return false;
+
+      DocumentReference userRef = _firestore.collection('users').doc(userId);
+
+      return await _firestore.runTransaction((transaction) async {
+        DocumentSnapshot userDoc = await transaction.get(userRef);
+        int currentCoins =
+            (userDoc.data() as Map<String, dynamic>?)?['coins'] ?? 0;
+
+        if (currentCoins < 20) return false;
+
+        List<String> unlockedModules = List<String>.from(
+          (userDoc.data() as Map<String, dynamic>?)?['unlocked_modules'] ?? [],
+        );
+
+        if (!unlockedModules.contains(moduleId)) {
+          unlockedModules.add(moduleId);
+          transaction.update(userRef, {
+            'unlocked_modules': unlockedModules,
+            'coins': currentCoins - 20,
+          });
+        }
+
+        return true;
+      });
+    } catch (e) {
+      print('Error unlocking module: $e');
+      return false;
+    }
   }
 }

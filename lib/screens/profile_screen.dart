@@ -31,11 +31,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'pointsToNextLevel': 100,
   };
 
+  int _coins = 0;
+
   @override
   void initState() {
     super.initState();
     _loadUserProfile();
     _loadLevelInfo();
+    _loadUserCoins();
   }
 
   Future<void> _loadUserProfile() async {
@@ -77,6 +80,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  Future<void> _loadUserCoins() async {
+    int coins = await _firestoreService.getUserCoins();
+    if (!mounted) return;
+    setState(() {
+      _coins = coins;
+    });
+  }
+
   void _logout(BuildContext context) async {
     final soundService = SoundService();
     soundService.playSound("button_click.mp3");
@@ -109,6 +120,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 24),
 
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset('assets/coin.png', width: 20, height: 20),
+                        const SizedBox(width: 6),
+                        Text(
+                          _coins.toString(),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.purple,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/settings');
+                    },
+                    icon: const Icon(Icons.edit, size: 18),
+                    label: const Text(
+                      'Edit Profile',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
               Container(
                 padding: const EdgeInsets.symmetric(
                   vertical: 24,
@@ -133,111 +202,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: Column(
                   children: [
-                    CircleAvatar(
-                      radius: 52,
-                      backgroundColor: Colors.deepPurple.shade50,
-                      backgroundImage:
-                          (!_useDefaultAvatar &&
-                                  (user?.photoURL != null || avatar.isNotEmpty))
-                              ? (user?.photoURL != null
-                                  ? NetworkImage(user!.photoURL!)
-                                  : AssetImage(avatar) as ImageProvider)
-                              : null,
-                      onBackgroundImageError: (exception, stackTrace) {
-                        setState(() {
-                          _useDefaultAvatar = true;
-                        });
-                      },
-                      child:
-                          (_useDefaultAvatar ||
-                                  (user?.photoURL == null && avatar.isEmpty))
-                              ? const Icon(
-                                Icons.person,
-                                size: 50,
-                                color: Colors.deepPurple,
-                              )
-                              : null,
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundColor: Colors.white,
+                          child:
+                              _useDefaultAvatar
+                                  ? Text(
+                                    nickname[0].toUpperCase(),
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.purple,
+                                    ),
+                                  )
+                                  : Image.asset(avatar),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                nickname,
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.deepPurple,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Level ${_levelInfo['level']}',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.deepPurple.withOpacity(0.8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      username,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 22,
-                        color: Colors.deepPurple.shade900,
+                    const SizedBox(height: 20),
+                    LinearProgressIndicator(
+                      value:
+                          _levelInfo['points'] /
+                          _levelInfo['pointsToNextLevel'],
+                      backgroundColor: Colors.grey.shade200,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Colors.deepPurple,
                       ),
+                      minHeight: 8,
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "@$nickname",
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.edit),
-                      label: const Text("Edit Profile"),
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/settings');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
+                      '${_levelInfo['points']}/${_levelInfo['pointsToNextLevel']} points to next level',
+                      style: TextStyle(
+                        color: Colors.deepPurple.withOpacity(0.8),
+                        fontSize: 14,
                       ),
                     ),
                   ],
-                ),
-              ),
-
-              const SizedBox(height: 36),
-
-              Text(
-                "Level",
-                textAlign: TextAlign.center,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.3,
-                  color: Colors.deepPurple.shade700,
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Level ${_levelInfo['level']}',
-                        style: theme.textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 8),
-                      LinearProgressIndicator(
-                        value:
-                            (1 - (_levelInfo['pointsToNextLevel'] / 100))
-                                .toDouble(),
-                        backgroundColor: Colors.grey[200],
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Theme.of(context).primaryColor,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${_levelInfo['points']} points • ${_levelInfo['pointsToNextLevel']} to next level',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                    ],
-                  ),
                 ),
               ),
 
@@ -258,28 +286,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: _buildLessonProgress(
-                      "Healthy Food",
-                      "assets/covers/food.png",
-                      foodProgress,
-                    ),
+                  _buildLessonProgress(
+                    "Healthy Food",
+                    "assets/covers/food.png",
+                    foodProgress,
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildLessonProgress(
-                      "Hygiene",
-                      "assets/covers/hygiene.png",
-                      hygieneProgress,
-                    ),
+                  _buildLessonProgress(
+                    "Hygiene",
+                    "assets/covers/hygiene.png",
+                    hygieneProgress,
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildLessonProgress(
-                      "Gym",
-                      "assets/covers/gym.png",
-                      gymProgress,
-                    ),
+                  _buildLessonProgress(
+                    "Gym",
+                    "assets/covers/gym.png",
+                    gymProgress,
                   ),
                 ],
               ),
@@ -299,52 +321,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ? "0.5/1"
             : "0/1";
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 12),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          CustomPaint(
-            size: const Size(200, 100),
-            painter: OvalProgressPainter(progressFraction),
-          ),
-          Container(
-            width: 200,
-            height: 100,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: Colors.grey.shade300, width: 2),
-              borderRadius: BorderRadius.circular(50),
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 12),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            CustomPaint(
+              size: const Size(200, 100),
+              painter: OvalProgressPainter(progressFraction),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(imagePath, height: 50),
-                const SizedBox(width: 12),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+            Container(
+              width: double.infinity,
+              height: 100,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Colors.grey.shade300, width: 2),
+                borderRadius: BorderRadius.circular(50),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(imagePath, height: 50),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          "$progress% • $attemptText",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color:
+                                progress == 100 ? Colors.green : Colors.orange,
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      "$progress% • $attemptText",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: progress == 100 ? Colors.green : Colors.orange,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

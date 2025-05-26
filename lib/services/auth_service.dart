@@ -34,12 +34,10 @@ class AuthService {
 
       final user = userCredential.user;
       if (user != null) {
-        // First check if user exists by UID
         final userDocByUid =
             await _firestore.collection('users').doc(user.uid).get();
 
         if (userDocByUid.exists) {
-          // User exists, update their Google account info
           await _firestore.collection('users').doc(user.uid).update({
             'isGoogleSignIn': true,
             'email': user.email,
@@ -48,7 +46,6 @@ class AuthService {
             'lastSignIn': Timestamp.now(),
           });
 
-          // Navigate to dashboard screen
           if (context.mounted) {
             Navigator.pushReplacement(
               context,
@@ -56,7 +53,6 @@ class AuthService {
             );
           }
         } else {
-          // Check if user exists by email (in case they used a different sign-in method before)
           final userDocByEmail =
               await _firestore
                   .collection('users')
@@ -64,7 +60,6 @@ class AuthService {
                   .get();
 
           if (userDocByEmail.docs.isNotEmpty) {
-            // User exists with different UID, update their UID and Google info
             final existingDoc = userDocByEmail.docs.first;
             await _firestore.collection('users').doc(user.uid).set({
               ...existingDoc.data(),
@@ -76,10 +71,8 @@ class AuthService {
               'lastSignIn': Timestamp.now(),
             });
 
-            // Delete the old document
             await _firestore.collection('users').doc(existingDoc.id).delete();
 
-            // Navigate to dashboard screen
             if (context.mounted) {
               Navigator.pushReplacement(
                 context,
@@ -89,7 +82,6 @@ class AuthService {
               );
             }
           } else {
-            // New user, navigate to profile creation
             if (context.mounted) {
               Navigator.pushReplacement(
                 context,
