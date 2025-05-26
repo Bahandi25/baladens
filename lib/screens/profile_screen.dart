@@ -43,7 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     String? userId = user?.uid;
 
     if (user != null) {
-      if (!mounted) return; // Check mounted before setState
+      if (!mounted) return;
       setState(() {
         username = user.displayName ?? "User";
       });
@@ -58,7 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (userDoc.exists) {
         final progress = userDoc['progress'] ?? {};
-        if (!mounted) return; // Check mounted before setState
+        if (!mounted) return;
         setState(() {
           foodProgress = (progress['healthy_food'] ?? 0) as int;
           hygieneProgress = (progress['hygiene'] ?? 0) as int;
@@ -135,19 +135,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     CircleAvatar(
                       radius: 52,
+                      backgroundColor: Colors.deepPurple.shade50,
                       backgroundImage:
-                          (!_useDefaultAvatar && user?.photoURL != null)
-                              ? NetworkImage(user!.photoURL!)
-                              : AssetImage(avatar) as ImageProvider,
+                          (!_useDefaultAvatar &&
+                                  (user?.photoURL != null || avatar.isNotEmpty))
+                              ? (user?.photoURL != null
+                                  ? NetworkImage(user!.photoURL!)
+                                  : AssetImage(avatar) as ImageProvider)
+                              : null,
                       onBackgroundImageError: (exception, stackTrace) {
-                        print('Error loading profile image: $exception');
                         setState(() {
                           _useDefaultAvatar = true;
                         });
                       },
                       child:
-                          (_useDefaultAvatar || user?.photoURL == null)
-                              ? const Icon(Icons.person, size: 50)
+                          (_useDefaultAvatar ||
+                                  (user?.photoURL == null && avatar.isEmpty))
+                              ? const Icon(
+                                Icons.person,
+                                size: 50,
+                                color: Colors.deepPurple,
+                              )
                               : null,
                     ),
                     const SizedBox(height: 16),

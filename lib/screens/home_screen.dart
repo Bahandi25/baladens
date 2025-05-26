@@ -1,17 +1,67 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import '../services/sound_service.dart';
+import '../services/ai_assistant_service.dart';
 import 'lesson_screen.dart';
 import 'hygiene_screen.dart';
 import 'gym_screen.dart';
+import 'ai_assistant_screen.dart';
 import 'dart:math';
+import 'package:another_flushbar/flushbar.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  Timer? _inactivityTimer;
+  int _reminderCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _startInactivityTimer();
+  }
+
+  void _showInactivityBanner() {
+    if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
+
+    Flushbar(
+      title: "Don't Forget! 🧠",
+      message: "It's time to learn something new. Tap a module to begin!",
+      icon: const Icon(Icons.access_time, color: Colors.white),
+      duration: const Duration(seconds: 4),
+      flushbarPosition: FlushbarPosition.TOP,
+      backgroundColor: Colors.indigo.shade400,
+      margin: const EdgeInsets.all(8),
+      borderRadius: BorderRadius.circular(12),
+      animationDuration: const Duration(milliseconds: 500),
+      forwardAnimationCurve: Curves.easeOutBack,
+    ).show(context);
+  }
+
+  @override
+  void dispose() {
+    _inactivityTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startInactivityTimer() {
+    _inactivityTimer?.cancel(); // очистим старый таймер
+    _inactivityTimer = Timer.periodic(const Duration(seconds: 20), (timer) {
+      _showInactivityBanner();
+    });
+  }
 
   void _handleModuleTap(BuildContext context, String module) {
     final soundService = SoundService();
     soundService.playSound("button_click.mp3");
+
+    _inactivityTimer?.cancel(); // остановить таймер
 
     if (module == "Healthy Food") {
       Navigator.pushReplacement(
@@ -96,6 +146,51 @@ class HomeScreen extends StatelessWidget {
                           color: Colors.indigo.shade700,
                         ),
                       ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // AI Assistant Widget
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.assistant, color: Colors.indigo.shade400),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        "Need help? Ask me anything about the modules!",
+                        style: TextStyle(
+                          color: Colors.indigo.shade700,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_forward),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AIAssistantScreen(),
+                          ),
+                        );
+                      },
+                      color: Colors.indigo.shade400,
                     ),
                   ],
                 ),
