@@ -42,12 +42,10 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
     bool isUnlocked = await _firestoreService.isModuleUnlocked(moduleId);
 
     setState(() {
-      // Calculate completed levels based on progress
       int completedLevels = (progress / 100 * widget.totalLevels).floor();
       for (int i = 0; i < _levelCompletion.length; i++) {
         _levelCompletion[i] = i < completedLevels;
       }
-      // Only the next level after the last completed one is unlocked
       _highestUnlockedLevel =
           completedLevels < widget.totalLevels
               ? completedLevels + 1
@@ -90,7 +88,6 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
       return;
     }
 
-    // For now, we'll use the existing quiz screens for level 1
     if (level == 1) {
       switch (widget.module) {
         case 'Gym':
@@ -113,7 +110,6 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
           break;
       }
     }
-    // For other levels, we'll show a "Coming Soon" message
     else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
