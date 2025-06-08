@@ -28,7 +28,11 @@ class _HomeScreenState extends State<HomeScreen> {
     _startInactivityTimer();
   }
 
-  void _showInactivityBanner() {
+ void _showInactivityBanner() {
+  if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
+
+  
+  Future.delayed(Duration.zero, () {
     if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
 
     Flushbar(
@@ -43,7 +47,9 @@ class _HomeScreenState extends State<HomeScreen> {
       animationDuration: const Duration(milliseconds: 500),
       forwardAnimationCurve: Curves.easeOutBack,
     ).show(context);
-  }
+  });
+}
+
 
   @override
   void dispose() {
@@ -52,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _startInactivityTimer() {
-    _inactivityTimer?.cancel(); // очистим старый таймер
+    _inactivityTimer?.cancel();
     _inactivityTimer = Timer.periodic(const Duration(seconds: 20), (timer) {
       _showInactivityBanner();
     });
@@ -62,8 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final soundService = SoundService();
     soundService.playSound("button_click.mp3");
 
-    _inactivityTimer?.cancel(); // остановить таймер
-
+    _inactivityTimer?.cancel(); 
     int totalLevels;
     switch (module) {
       case "Gym":

@@ -4,6 +4,8 @@ import '../services/firestore_service.dart';
 import 'gym_quiz.dart';
 import 'hygiene_quiz.dart';
 import 'lesson_screen.dart';
+import 'quiz_screen_level2.dart';
+import 'hygiene_quiz_level2.dart';
 
 class LevelSelectionScreen extends StatefulWidget {
   final String module;
@@ -33,10 +35,8 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
   }
 
   Future<void> _loadLevelProgress() async {
-    // Initialize level completion status
-    _levelCompletion = List.filled(widget.totalLevels, false);
 
-    // Load progress from Firestore
+    _levelCompletion = List.filled(widget.totalLevels, false);
     String moduleId = widget.module.toLowerCase().replaceAll(' ', '_');
     int progress = await _firestoreService.getUserProgress(moduleId);
     bool isUnlocked = await _firestoreService.isModuleUnlocked(moduleId);
@@ -88,7 +88,7 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
       return;
     }
 
-    if (level == 1) {
+        if (level == 1) {
       switch (widget.module) {
         case 'Gym':
           Navigator.push(
@@ -109,8 +109,17 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
           );
           break;
       }
-    }
-    else {
+    } else if (level == 2 && widget.module == 'Healthy Food') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const QuizScreenLevel2()),
+      );
+      } else if (level == 2 && widget.module == 'Hygiene') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const HygieneLevelTwoScreen()),
+      );
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("This level will be available soon!"),

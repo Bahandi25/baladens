@@ -314,12 +314,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildLessonProgress(String title, String imagePath, int progress) {
     double progressFraction = progress / 100;
-    String attemptText =
-        progress == 100
-            ? "1/1"
-            : progress == 50
-            ? "0.5/1"
-            : "0/1";
+    int totalLessons = 2; 
+    int completedLessons = (progress / 100 * totalLessons).round();
+    String attemptText = "$completedLessons/$totalLessons";
 
     return Expanded(
       child: Container(
