@@ -1,17 +1,16 @@
-
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'quiz_result_screen.dart';
 import '../services/sound_service.dart';
 
-class QuizScreen extends StatefulWidget {
-  const QuizScreen({super.key});
+class QuizScreenLevel7 extends StatefulWidget {
+  const QuizScreenLevel7({super.key});
 
   @override
-  State<QuizScreen> createState() => _QuizScreenState();
+  State<QuizScreenLevel7> createState() => _QuizScreenLevel7State();
 }
 
-class _QuizScreenState extends State<QuizScreen> {
+class _QuizScreenLevel7State extends State<QuizScreenLevel7> {
   final SoundService _soundService = SoundService();
   String? selectedAnswer;
   bool isCorrect = false;
@@ -19,7 +18,7 @@ class _QuizScreenState extends State<QuizScreen> {
   void checkAnswer(String answer) {
     setState(() {
       selectedAnswer = answer;
-      isCorrect = (answer == "Salad");
+      isCorrect = (answer == "Mother's food");
     });
 
     _soundService.playSound(isCorrect ? "correct.mp3" : "wrong.mp3");
@@ -37,7 +36,7 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green.shade50,
+      backgroundColor: Colors.purple.shade50,
       body: Center(
         child: SingleChildScrollView(
           child: Container(
@@ -60,7 +59,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 Lottie.asset('assets/animations/thinking.json', height: 140),
                 const SizedBox(height: 20),
                 const Text(
-                  "What should I eat?",
+                  "Which of these is the most wholesome meal?",
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -69,17 +68,16 @@ class _QuizScreenState extends State<QuizScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-
                 GridView.count(
                   crossAxisCount: 2,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   childAspectRatio: 1,
                   children: [
-                    _buildAnswerOption("Hamburger", "🍔"),
-                    _buildAnswerOption("Salad", "🥗"),
-                    _buildAnswerOption("Pizza", "🍕"),
-                    _buildAnswerOption("Burrito", "🌯"),
+                    _buildAnswerOption("Doner", "🥙"),
+                    _buildAnswerOption("Rollton", "🍜"),
+                    _buildAnswerOption("Sushi", "🍣"),
+                    _buildAnswerOption("Mother's food", "🍲"), // ✅ Correct
                   ],
                 ),
               ],
@@ -110,7 +108,7 @@ class _QuizScreenState extends State<QuizScreen> {
                   ? (isCorrect ? Colors.green : Colors.red).withOpacity(0.4)
                   : Colors.black12,
               blurRadius: 6,
-              offset: Offset(0, 3),
+              offset: const Offset(0, 3),
             )
           ],
         ),

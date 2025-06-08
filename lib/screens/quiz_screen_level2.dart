@@ -36,7 +36,7 @@ class _QuizScreenLevel2State extends State<QuizScreenLevel2> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue.shade50,
+      backgroundColor: const Color.fromARGB(255, 18, 21, 24),
       body: Center(
         child: SingleChildScrollView(
           child: Container(
