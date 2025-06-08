@@ -5,10 +5,18 @@ import 'gym_quiz.dart';
 import 'hygiene_quiz.dart';
 import 'lesson_screen.dart';
 import 'quiz_screen_level2.dart';
+import 'quiz_screen_level3.dart';
+import 'quiz_screen_level4.dart';
+import 'quiz_screen_level5.dart';
 import 'hygiene_quiz_level2.dart';
 import 'hygiene_quiz_level3.dart';
 import 'hygiene_quiz_level4.dart';
 import 'hygiene_quiz_level5.dart';
+import 'gym_level1.dart';
+import 'gym_level2.dart';
+import 'gym_level3.dart';
+import 'gym_level4.dart';
+import 'gym_level5.dart';
 
 class LevelSelectionScreen extends StatefulWidget {
   final String module;
@@ -29,7 +37,6 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
   final SoundService _soundService = SoundService();
   List<bool> _levelCompletion = [];
   int _highestUnlockedLevel = 1;
-  bool _isModuleUnlocked = false;
 
   @override
   void initState() {
@@ -38,67 +45,74 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
   }
 
   Future<void> _loadLevelProgress() async {
-
     _levelCompletion = List.filled(widget.totalLevels, false);
     String moduleId = widget.module.toLowerCase().replaceAll(' ', '_');
     int progress = await _firestoreService.getUserProgress(moduleId);
-    bool isUnlocked = await _firestoreService.isModuleUnlocked(moduleId);
 
     setState(() {
       int completedLevels = (progress / 100 * widget.totalLevels).floor();
       for (int i = 0; i < _levelCompletion.length; i++) {
         _levelCompletion[i] = i < completedLevels;
       }
-      _highestUnlockedLevel =
-          completedLevels < widget.totalLevels
-              ? completedLevels + 1
-              : widget.totalLevels;
-      _isModuleUnlocked = isUnlocked;
+      if (widget.module == 'Gym') {
+        _highestUnlockedLevel = widget.totalLevels;
+      } else {
+        _highestUnlockedLevel =
+            completedLevels < widget.totalLevels
+                ? completedLevels + 1
+                : widget.totalLevels;
+      }
     });
-  }
-
-  Future<void> _tryUnlockModule() async {
-    String moduleId = widget.module.toLowerCase().replaceAll(' ', '_');
-    bool success = await _firestoreService.unlockModule(moduleId);
-
-    if (success) {
-      setState(() {
-        _isModuleUnlocked = true;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Module unlocked successfully!"),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Not enough coins! You need 20 coins to unlock this module.",
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
 
   void _navigateToLevel(int level) {
     _soundService.playSound("button_click.mp3");
 
-    if (!_isModuleUnlocked && widget.module == "Gym") {
-      _tryUnlockModule();
+    if (widget.module == 'Gym') {
+      switch (level) {
+        case 1:
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const GymLevel1Screen()),
+          );
+          break;
+        case 2:
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const GymLevel2Screen()),
+          );
+          break;
+        case 3:
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const GymLevel3Screen()),
+          );
+          break;
+        case 4:
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const GymLevel4Screen()),
+          );
+          break;
+        case 5:
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const GymLevel5Screen()),
+          );
+          break;
+        default:
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("This level will be available soon!"),
+              duration: Duration(seconds: 2),
+            ),
+          );
+      }
       return;
     }
 
-        if (level == 1) {
+    if (level == 1) {
       switch (widget.module) {
-        case 'Gym':
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const GymQuizScreen()),
-          );
-          break;
         case 'Hygiene':
           Navigator.push(
             context,
@@ -117,31 +131,46 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
         context,
         MaterialPageRoute(builder: (context) => const QuizScreenLevel2()),
       );
-      } else if (level == 2 && widget.module == 'Hygiene') {
+    } else if (level == 3 && widget.module == 'Healthy Food') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const QuizScreenLevel3()),
+      );
+    } else if (level == 4 && widget.module == 'Healthy Food') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const QuizScreenLevel4()),
+      );
+    } else if (level == 5 && widget.module == 'Healthy Food') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const QuizScreenLevel5()),
+      );
+    } else if (level == 2 && widget.module == 'Hygiene') {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const HygieneLevelTwoScreen()),
       );
-      }
-      else if (level == 3 && widget.module == 'Hygiene') {
-       Navigator.push(
-       context,
-      MaterialPageRoute(builder: (context) => const HygieneTapToRemoveScreen()),
-     );
-      }
-     else if (level == 4 && widget.module == 'Hygiene') {
-  Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => const ToothbrushGameScreen()),
-  );
- } 
- else if (level == 5 && widget.module == 'Hygiene') {
-  Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => const HygienePuzzleLevel5Screen()),
-  );
- }
-  else {
+    } else if (level == 3 && widget.module == 'Hygiene') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HygieneTapToRemoveScreen(),
+        ),
+      );
+    } else if (level == 4 && widget.module == 'Hygiene') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const ToothbrushGameScreen()),
+      );
+    } else if (level == 5 && widget.module == 'Hygiene') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HygienePuzzleLevel5Screen(),
+        ),
+      );
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("This level will be available soon!"),
@@ -224,50 +253,6 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              if (!_isModuleUnlocked && widget.module == "Gym")
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.purple.shade100,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.purple.shade300),
-                  ),
-                  child: Row(
-                    children: [
-                      Image.asset('assets/coin.png', width: 32, height: 32),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Locked Module",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.purple,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              "Unlock this module for 20 coins",
-                              style: TextStyle(color: Colors.purple),
-                            ),
-                          ],
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: _tryUnlockModule,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.purple,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: const Text("Unlock"),
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 16),
               Text(
                 'Complete levels to unlock new challenges!',
                 style: TextStyle(

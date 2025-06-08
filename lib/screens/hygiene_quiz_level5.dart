@@ -7,13 +7,17 @@ class HygienePuzzleLevel5Screen extends StatefulWidget {
   const HygienePuzzleLevel5Screen({super.key});
 
   @override
-  State<HygienePuzzleLevel5Screen> createState() => _HygienePuzzleLevel5ScreenState();
+  State<HygienePuzzleLevel5Screen> createState() =>
+      _HygienePuzzleLevel5ScreenState();
 }
 
 class _HygienePuzzleLevel5ScreenState extends State<HygienePuzzleLevel5Screen> {
   final SoundService _soundService = SoundService();
 
-  List<String> pieces = List.generate(9, (index) => 'puzzle/${index + 1}.png');
+  List<String> pieces = List.generate(
+    9,
+    (index) => 'assets/puzzle/${index + 1}.png',
+  );
   late List<String> shuffledPieces;
 
   @override
@@ -57,7 +61,7 @@ class _HygienePuzzleLevel5ScreenState extends State<HygienePuzzleLevel5Screen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                Lottie.asset("animations/puzzle.json", height: 150),
+                Lottie.asset("assets/animations/puzzle.json", height: 150),
                 const SizedBox(height: 16),
                 const Text(
                   "Arrange the puzzle pieces!",
@@ -71,20 +75,28 @@ class _HygienePuzzleLevel5ScreenState extends State<HygienePuzzleLevel5Screen> {
                   child: GridView.builder(
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: 9,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 4,
-                      mainAxisSpacing: 4,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 4,
+                          mainAxisSpacing: 4,
+                        ),
                     itemBuilder: (context, index) {
                       return DragTarget<int>(
                         builder: (context, candidateData, rejectedData) {
                           return Draggable<int>(
                             data: index,
-                            feedback: _buildTile(shuffledPieces[index], tileSize, dragging: true),
+                            feedback: _buildTile(
+                              shuffledPieces[index],
+                              tileSize,
+                              dragging: true,
+                            ),
                             childWhenDragging: Opacity(
                               opacity: 0.3,
-                              child: _buildTile(shuffledPieces[index], tileSize),
+                              child: _buildTile(
+                                shuffledPieces[index],
+                                tileSize,
+                              ),
                             ),
                             child: _buildTile(shuffledPieces[index], tileSize),
                           );
@@ -101,15 +113,22 @@ class _HygienePuzzleLevel5ScreenState extends State<HygienePuzzleLevel5Screen> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green.shade600,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   onPressed: () {
                     _soundService.playSound("button_click.mp3");
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => HygieneResultScreen(isCorrect: isCorrect),
+                        builder:
+                            (context) =>
+                                HygieneResultScreen(isCorrect: isCorrect),
                       ),
                     );
                   },
@@ -132,19 +151,17 @@ class _HygienePuzzleLevel5ScreenState extends State<HygienePuzzleLevel5Screen> {
       height: size,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        image: DecorationImage(
-          image: AssetImage(imgPath),
-          fit: BoxFit.cover,
-        ),
-        boxShadow: dragging
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 5,
-                  offset: Offset(0, 3),
-                )
-              ],
+        image: DecorationImage(image: AssetImage(imgPath), fit: BoxFit.cover),
+        boxShadow:
+            dragging
+                ? []
+                : [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 5,
+                    offset: Offset(0, 3),
+                  ),
+                ],
         border: Border.all(color: Colors.white, width: 2),
       ),
     );

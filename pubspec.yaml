@@ -47,6 +47,7 @@ dependencies:
   flutter_local_notifications: ^17.1.2
   another_flushbar: ^1.10.30
   http: ^1.2.0
+  model_viewer_plus: ^1.7.0
 
 dev_dependencies:
   flutter_test:
