@@ -72,6 +72,7 @@ flutter:
     - assets/images/
     - assets/covers/
     - assets/badges/
+    - assets/puzzle/
     - assets/google_logo.png
     - assets/badgelogo.png
   # The following line ensures that the Material Icons font is

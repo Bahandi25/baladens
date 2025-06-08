@@ -6,6 +6,9 @@ import 'hygiene_quiz.dart';
 import 'lesson_screen.dart';
 import 'quiz_screen_level2.dart';
 import 'hygiene_quiz_level2.dart';
+import 'hygiene_quiz_level3.dart';
+import 'hygiene_quiz_level4.dart';
+import 'hygiene_quiz_level5.dart';
 
 class LevelSelectionScreen extends StatefulWidget {
   final String module;
@@ -119,7 +122,26 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
         context,
         MaterialPageRoute(builder: (context) => const HygieneLevelTwoScreen()),
       );
-    } else {
+      }
+      else if (level == 3 && widget.module == 'Hygiene') {
+       Navigator.push(
+       context,
+      MaterialPageRoute(builder: (context) => const HygieneTapToRemoveScreen()),
+     );
+      }
+     else if (level == 4 && widget.module == 'Hygiene') {
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const ToothbrushGameScreen()),
+  );
+ } 
+ else if (level == 5 && widget.module == 'Hygiene') {
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const HygienePuzzleLevel5Screen()),
+  );
+ }
+  else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("This level will be available soon!"),
