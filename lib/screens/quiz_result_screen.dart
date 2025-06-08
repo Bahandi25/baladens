@@ -13,7 +13,7 @@ class QuizResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int score = isCorrect ? 100 : 50; 
+    int score = isCorrect ? 100 : 50;
 
     _firestoreService.saveLessonProgress("healthy_food", score);
     _soundService.playSound("lesson_complete.mp3");
@@ -24,17 +24,31 @@ class QuizResultScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             isCorrect
-                ? Lottie.asset("assets/animations/correct_answer.json", height: 250)
-                : Lottie.asset("assets/animations/wrong_answer.json", height: 250),
+                ? Lottie.asset(
+                  "assets/animations/correct_answer.json",
+                  height: 250,
+                )
+                : Lottie.asset(
+                  "assets/animations/wrong_answer.json",
+                  height: 250,
+                ),
             const SizedBox(height: 20),
-            Text(isCorrect ? "Well done!" : "Try again next time!",
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            Text(
+              isCorrect ? "Well done!" : "Try again next time!",
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 20),
             ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const DashboardScreen()));
-                },
-                child: const Text("Back to Dashboard"))
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DashboardScreen(),
+                  ),
+                );
+              },
+              child: const Text("Back to Dashboard"),
+            ),
           ],
         ),
       ),
