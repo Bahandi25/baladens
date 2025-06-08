@@ -28,28 +28,26 @@ class _HomeScreenState extends State<HomeScreen> {
     _startInactivityTimer();
   }
 
- void _showInactivityBanner() {
-  if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
-
-  
-  Future.delayed(Duration.zero, () {
+  void _showInactivityBanner() {
     if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
 
-    Flushbar(
-      title: "Don't Forget! 🧠",
-      message: "It's time to learn something new. Tap a module to begin!",
-      icon: const Icon(Icons.access_time, color: Colors.white),
-      duration: const Duration(seconds: 4),
-      flushbarPosition: FlushbarPosition.TOP,
-      backgroundColor: Colors.indigo.shade400,
-      margin: const EdgeInsets.all(8),
-      borderRadius: BorderRadius.circular(12),
-      animationDuration: const Duration(milliseconds: 500),
-      forwardAnimationCurve: Curves.easeOutBack,
-    ).show(context);
-  });
-}
+    Future.delayed(Duration.zero, () {
+      if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
 
+      Flushbar(
+        title: "Don't Forget! 🧠",
+        message: "It's time to learn something new. Tap a module to begin!",
+        icon: const Icon(Icons.access_time, color: Colors.white),
+        duration: const Duration(seconds: 4),
+        flushbarPosition: FlushbarPosition.TOP,
+        backgroundColor: Colors.indigo.shade400,
+        margin: const EdgeInsets.all(8),
+        borderRadius: BorderRadius.circular(12),
+        animationDuration: const Duration(milliseconds: 500),
+        forwardAnimationCurve: Curves.easeOutBack,
+      ).show(context);
+    });
+  }
 
   @override
   void dispose() {
@@ -68,17 +66,17 @@ class _HomeScreenState extends State<HomeScreen> {
     final soundService = SoundService();
     soundService.playSound("button_click.mp3");
 
-    _inactivityTimer?.cancel(); 
+    _inactivityTimer?.cancel();
     int totalLevels;
     switch (module) {
       case "Gym":
-        totalLevels = 12;
+        totalLevels = 5;
         break;
       case "Hygiene":
-        totalLevels = 9;
+        totalLevels = 5;
         break;
       case "Healthy Food":
-        totalLevels = 7;
+        totalLevels = 5;
         break;
       default:
         totalLevels = 0;

@@ -14,6 +14,11 @@ import 'hygiene_quiz_level2.dart';
 import 'hygiene_quiz_level3.dart';
 import 'hygiene_quiz_level4.dart';
 import 'hygiene_quiz_level5.dart';
+import 'gym_level1.dart';
+import 'gym_level2.dart';
+import 'gym_level3.dart';
+import 'gym_level4.dart';
+import 'gym_level5.dart';
 
 class LevelSelectionScreen extends StatefulWidget {
   final String module;
@@ -34,7 +39,6 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
   final SoundService _soundService = SoundService();
   List<bool> _levelCompletion = [];
   int _highestUnlockedLevel = 1;
-  bool _isModuleUnlocked = false;
 
   @override
   void initState() {
@@ -43,11 +47,9 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
   }
 
   Future<void> _loadLevelProgress() async {
-
     _levelCompletion = List.filled(widget.totalLevels, false);
     String moduleId = widget.module.toLowerCase().replaceAll(' ', '_');
     int progress = await _firestoreService.getUserProgress(moduleId);
-    bool isUnlocked = await _firestoreService.isModuleUnlocked(moduleId);
 
     setState(() {
       int completedLevels = (progress / 100 * widget.totalLevels).floor();
@@ -55,135 +57,97 @@ class _LevelSelectionScreenState extends State<LevelSelectionScreen> {
         _levelCompletion[i] = i < completedLevels;
       }
       _highestUnlockedLevel =
-          completedLevels < widget.totalLevels
-              ? completedLevels + 1
-              : widget.totalLevels;
-      _isModuleUnlocked = isUnlocked;
+          completedLevels < widget.totalLevels ? completedLevels + 1 : widget.totalLevels;
     });
   }
 
-  Future<void> _tryUnlockModule() async {
-    String moduleId = widget.module.toLowerCase().replaceAll(' ', '_');
-    bool success = await _firestoreService.unlockModule(moduleId);
+  void _navigateToLevel(int level) {
+    _soundService.playSound("button_click.mp3");
 
-    if (success) {
-      setState(() {
-        _isModuleUnlocked = true;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Module unlocked successfully!"),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Not enough coins! You need 20 coins to unlock this module.",
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
+    if (widget.module == 'Gym') {
+      switch (level) {
+        case 1:
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const GymLevel1Screen()));
+          return;
+        case 2:
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const GymLevel2Screen()));
+          return;
+        case 3:
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const GymLevel3Screen()));
+          return;
+        case 4:
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const GymLevel4Screen()));
+          return;
+        case 5:
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const GymLevel5Screen()));
+          return;
+        default:
+          _showComingSoon();
+          return;
+      }
     }
-  }
 
-void _navigateToLevel(int level) {
-  _soundService.playSound("button_click.mp3");
-
-  if (!_isModuleUnlocked && widget.module == "Gym") {
-    _tryUnlockModule();
-    return;
-  }
-
-  if (level == 1) {
-    switch (widget.module) {
-      case 'Gym':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const GymQuizScreen()),
-        );
-        break;
-      case 'Hygiene':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const HygieneQuizScreen()),
-        );
-        break;
-      case 'Healthy Food':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const LessonScreen()),
-        );
-        break;
+    if (widget.module == 'Healthy Food') {
+      switch (level) {
+        case 1:
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const LessonScreen()));
+          return;
+        case 2:
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizScreenLevel2()));
+          return;
+        case 3:
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizScreenLevel3()));
+          return;
+        case 4:
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizScreenLevel4()));
+          return;
+        case 5:
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizScreenLevel5()));
+          return;
+        case 6:
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizScreenLevel6()));
+          return;
+        case 7:
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizScreenLevel7()));
+          return;
+        default:
+          _showComingSoon();
+          return;
+      }
     }
-  } else if (level == 2 && widget.module == 'Healthy Food') {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const QuizScreenLevel2()),
-    );
-  } else if (level == 3 && widget.module == 'Healthy Food') {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const QuizScreenLevel3()),
-    );
-    
-  } else if (level == 4 && widget.module == 'Healthy Food') {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const QuizScreenLevel4()),
-    );
-  
-  }
-  else if (level == 5 && widget.module == 'Healthy Food') {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const QuizScreenLevel5()),
-    );
-  
-  }
-  else if (level == 6 && widget.module == 'Healthy Food') {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const QuizScreenLevel6()),
-    );
-  
-  }else if (level == 7 && widget.module == 'Healthy Food') {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const QuizScreenLevel7()),
-    );
-  
-  }else if (level == 2 && widget.module == 'Hygiene') {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const HygieneLevelTwoScreen()),
-    );
-  } else if (level == 3 && widget.module == 'Hygiene') {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const HygieneTapToRemoveScreen()),
-    );
-  } else if (level == 4 && widget.module == 'Hygiene') {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const ToothbrushGameScreen()),
-    );
-  } else if (level == 5 && widget.module == 'Hygiene') {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const HygienePuzzleLevel5Screen()),
-    );
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("This level will be available soon!"),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
-}
 
+    if (widget.module == 'Hygiene') {
+      switch (level) {
+        case 1:
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const HygieneQuizScreen()));
+          return;
+        case 2:
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const HygieneLevelTwoScreen()));
+          return;
+        case 3:
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const HygieneTapToRemoveScreen()));
+          return;
+        case 4:
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const ToothbrushGameScreen()));
+          return;
+        case 5:
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const HygienePuzzleLevel5Screen()));
+          return;
+        default:
+          _showComingSoon();
+          return;
+      }
+    }
+
+    _showComingSoon();
+  }
+
+  void _showComingSoon() {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text("This level will be available soon!"),
+      duration: Duration(seconds: 2),
+    ));
+  }
 
   Widget _buildHexagonLevel(int level) {
     bool isCompleted = _levelCompletion[level - 1];
@@ -195,13 +159,11 @@ void _navigateToLevel(int level) {
         width: 80,
         height: 90,
         decoration: BoxDecoration(
-          color:
-              isLocked
-                  ? Colors.grey.shade300
-                  : isCompleted
+          color: isLocked
+              ? Colors.grey.shade300
+              : isCompleted
                   ? Colors.lightGreen.shade200
                   : Colors.purple.shade100,
-          shape: BoxShape.rectangle,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Stack(
@@ -218,18 +180,11 @@ void _navigateToLevel(int level) {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color:
-                          isCompleted
-                              ? Colors.green.shade800
-                              : Colors.purple.shade800,
+                      color: isCompleted ? Colors.green.shade800 : Colors.purple.shade800,
                     ),
                   ),
                   if (isCompleted)
-                    const Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
-                      size: 20,
-                    ),
+                    const Icon(Icons.check_circle, color: Colors.green, size: 20),
                 ],
               ),
           ],
@@ -258,50 +213,6 @@ void _navigateToLevel(int level) {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              if (!_isModuleUnlocked && widget.module == "Gym")
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.purple.shade100,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.purple.shade300),
-                  ),
-                  child: Row(
-                    children: [
-                      Image.asset('assets/coin.png', width: 32, height: 32),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Locked Module",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.purple,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              "Unlock this module for 20 coins",
-                              style: TextStyle(color: Colors.purple),
-                            ),
-                          ],
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: _tryUnlockModule,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.purple,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: const Text("Unlock"),
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 16),
               Text(
                 'Complete levels to unlock new challenges!',
                 style: TextStyle(
@@ -321,8 +232,7 @@ void _navigateToLevel(int level) {
                     mainAxisSpacing: 16,
                   ),
                   itemCount: widget.totalLevels,
-                  itemBuilder:
-                      (context, index) => _buildHexagonLevel(index + 1),
+                  itemBuilder: (context, index) => _buildHexagonLevel(index + 1),
                 ),
               ),
             ],
