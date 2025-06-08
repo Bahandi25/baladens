@@ -4,7 +4,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../screens/dashboard_screen.dart';
 
 class ProfileCreationScreen extends StatefulWidget {
-  const ProfileCreationScreen({super.key});
+  final User user;
+  final bool isGoogleSignIn;
+  final bool isGuest;
+
+  const ProfileCreationScreen({
+    super.key,
+    required this.user,
+    this.isGoogleSignIn = false,
+    this.isGuest = false,
+  });
 
   @override
   State<ProfileCreationScreen> createState() => _ProfileCreationScreenState();
@@ -27,10 +36,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
     _offsetAnimation = Tween<Offset>(
       begin: const Offset(0.0, 0.5),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
     _controller.forward();
   }
 
@@ -43,16 +49,23 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
 
   Future<void> saveProfile() async {
     if (_nameController.text.trim().isEmpty) return;
-    String? userId = FirebaseAuth.instance.currentUser?.uid;
 
-    await FirebaseFirestore.instance.collection('users').doc(userId).set({
-      'name': _nameController.text.trim(),
-      'avatar': selectedAvatar.split('/').last,
-      'progress': {},
-      'badges': [],
-      'soundEnabled': true,
-      'createdAt': Timestamp.now(),
-    });
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.user.uid)
+        .set({
+          'uid': widget.user.uid,
+          'email': widget.user.email,
+          'name': _nameController.text.trim(),
+          'avatar': selectedAvatar.split('/').last,
+          'progress': {},
+          'badges': [],
+          'soundEnabled': true,
+          'createdAt': Timestamp.now(),
+          'isGoogleSignIn': widget.isGoogleSignIn,
+          'isGuest': widget.isGuest,
+          'lastSignIn': Timestamp.now(),
+        });
 
     Navigator.pushReplacement(
       context,
@@ -122,8 +135,10 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
                     icon: const Icon(Icons.arrow_forward),
                     label: const Text("Continue"),
                     style: ElevatedButton.styleFrom(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 14,
+                      ),
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.blueAccent,
                       elevation: 4,
@@ -146,9 +161,10 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
       onTap: () => setState(() => selectedAvatar = avatarPath),
       child: CircleAvatar(
         radius: 40,
-        backgroundColor: selectedAvatar == avatarPath
-            ? Colors.blueAccent
-            : Colors.transparent,
+        backgroundColor:
+            selectedAvatar == avatarPath
+                ? Colors.blueAccent
+                : Colors.transparent,
         child: CircleAvatar(
           radius: 36,
           backgroundImage: AssetImage(avatarPath),

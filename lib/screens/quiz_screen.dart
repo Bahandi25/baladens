@@ -99,27 +99,26 @@ class _QuizScreenState extends State<QuizScreen> {
         margin: const EdgeInsets.all(8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isSelected
-              ? (isCorrect ? Colors.greenAccent : Colors.redAccent)
-              : Colors.grey.shade200,
+          color:
+              isSelected
+                  ? (isCorrect ? Colors.greenAccent : Colors.redAccent)
+                  : Colors.grey.shade200,
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: isSelected
-                  ? (isCorrect ? Colors.green : Colors.red).withOpacity(0.4)
-                  : Colors.black12,
+              color:
+                  isSelected
+                      ? (isCorrect ? Colors.green : Colors.red).withOpacity(0.4)
+                      : Colors.black12,
               blurRadius: 6,
               offset: Offset(0, 3),
-            )
+            ),
           ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              emoji,
-              style: const TextStyle(fontSize: 32),
-            ),
+            Text(emoji, style: const TextStyle(fontSize: 32)),
             const SizedBox(height: 10),
             Text(
               answer,

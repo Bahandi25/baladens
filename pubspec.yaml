@@ -43,6 +43,11 @@ dependencies:
   flutter_animate: ^4.5.2
   just_audio: ^0.9.46
   shared_preferences: ^2.5.2
+  firebase_messaging: ^15.2.3
+  flutter_local_notifications: ^17.1.2
+  another_flushbar: ^1.10.30
+  http: ^1.2.0
+  model_viewer_plus: ^1.7.0
 
 dev_dependencies:
   flutter_test:
@@ -61,10 +66,16 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
+    - assets/
     - assets/avatars/
     - assets/animations/
     - assets/sounds/
     - assets/images/
+    - assets/covers/
+    - assets/badges/
+    - assets/puzzle/
+    - assets/google_logo.png
+    - assets/badgelogo.png
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
